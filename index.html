@@ -1,39 +1,34 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>美甲试戴 · 可取消/可重跑 GrabCut 版</title>
-  <style>
-    :root { --bg:#0f1115; --panel:#171a21; --muted:#9aa0a6; --text:#e6e6e6; --warn:#ff7272; --ok:#6ee7a8; }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
-         background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
-    #left{flex:1;display:flex;align-items:center;justify-content:center;background:#000;position:relative}
-    #right{width:420px;padding:14px;background:var(--panel);overflow:auto}
-    h2{margin:6px 0 10px 0}
-    video{display:none}
-    canvas{max-width:100%;max-height:100%;background:#000;border-radius:10px}
-    .btn{display:block;width:100%;margin:8px 0;padding:10px;border:0;border-radius:10px;background:#2a2f3a;color:#fff;cursor:pointer}
-    .btn[disabled]{opacity:.6;cursor:not-allowed}
-    .btn:hover{background:#343b49}
-    input[type=file],input[type=range]{width:100%;margin:8px 0}
-    label{font-size:12px;color:var(--muted);display:block;margin-top:6px}
-    #thumb{width:100%;border-radius:8px;border:1px solid #222;background:#111}
-    #status{font-size:12px;color:#bbb;margin:6px 0;white-space:pre-wrap;min-height:2.2em}
-    #banner{position:absolute;top:10px;left:10px;right:10px;background:#222a;color:#fff;
-            padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4;display:none}
-    #banner.warn{background:#4a1f1f}
-    #banner.ok{background:#1f3f2b}
-    .row{display:flex;gap:8px}
-    .row .btn{flex:1}
-    .note{color:#9aa0a6;font-size:12px}
-    #editWrap{border:1px solid #333;border-radius:8px;padding:8px;margin-top:8px;background:#0b0d12}
-    #edit{width:100%;background:#111;border-radius:8px;touch-action:none}
-    .segchip{padding:4px 8px;border-radius:999px;border:1px solid #333;background:#1a1f2b;cursor:pointer}
-    .segchip.active{border-color:#5b8cff;background:#223055}
-    #controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>美甲试戴 · 自动抠指甲 + 实时试戴</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--muted:#9aa0a6;--text:#e6e6e6;--warn:#ff6b6b;--ok:#34d399}
+  *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+  #left{flex:1;display:flex;align-items:center;justify-content:center;background:#000;position:relative}
+  #right{width:430px;max-width:430px;padding:14px;background:var(--panel);overflow:auto}
+  video{display:none} canvas{max-width:100%;max-height:100%;background:#000;border-radius:10px}
+  h2{margin:6px 0 10px 0}
+  .btn{display:block;width:100%;margin:8px 0;padding:10px;border:0;border-radius:10px;background:#2a2f3a;color:#fff;cursor:pointer}
+  .btn:hover{background:#343b49} .btn[disabled]{opacity:.6;cursor:not-allowed}
+  input[type=file],input[type=range]{width:100%;margin:8px 0}
+  label{font-size:12px;color:var(--muted);display:block;margin-top:6px}
+  #status{font-size:12px;color:#bbb;margin:6px 0;white-space:pre-wrap;min-height:2.2em}
+  #banner{position:absolute;top:10px;left:10px;right:10px;background:#222a;color:#fff;padding:8px 10px;border-radius:8px;font-size:12px;line-height:1.4;display:none}
+  #banner.warn{background:#4a1f1f} #banner.ok{background:#1f3f2b}
+  .row{display:flex;gap:8px} .row .btn{flex:1}
+  .note{color:#9aa0a6;font-size:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #editWrap{border:1px solid #333;border-radius:8px;padding:8px;margin-top:8px;background:#0b0d12}
+  #edit{width:100%;background:#111;border-radius:8px;touch-action:none}
+  .segchip{padding:4px 8px;border-radius:999px;border:1px solid #333;background:#1a1f2b;cursor:pointer}
+  .segchip.active{border-color:#5b8cff;background:#223055}
+  details{margin-top:8px}
+  summary{cursor:pointer;color:#cbd5e1}
+  .switch{display:inline-flex;gap:8px;align-items:center;margin:6px 0}
+</style>
 </head>
 <body>
   <div id="left">
@@ -41,424 +36,449 @@
     <video id="cam" playsinline muted></video>
     <canvas id="canvas" width="1280" height="720"></canvas>
   </div>
-  <div id="right">
-    <h2>美甲试戴 · 可取消/可重跑 GrabCut</h2>
 
-    <div id="controls">
+  <div id="right">
+    <h2>美甲试戴 · 自动抠指甲 + 实时试戴</h2>
+
+    <div class="grid2">
       <button id="startCam" class="btn">开启相机</button>
       <button id="flipCam" class="btn">切换镜头</button>
       <button id="freeze" class="btn">冻结当前帧</button>
       <button id="usePhoto" class="btn">用手部照片预览</button>
     </div>
     <input type="file" id="handFile" accept="image/*" style="display:none"/>
-    <input type="file" id="styleFile" accept="image/*" />
-    <img id="thumb" alt="贴片预览" />
-    <div id="status">先选“款式图片”。不涂画笔也能抠（用矩形初始化）。</div>
 
-    <div class="row" style="align-items:center">
-      <span class="segchip active" id="tool_fg">前景画笔</span>
-      <span class="segchip" id="tool_bg">背景画笔</span>
-      <span class="segchip" id="tool_rect">矩形框</span>
-      <label style="margin-left:auto">画笔</label>
-      <input type="range" id="brush" min="4" max="40" step="1" value="16" style="width:120px"/>
-    </div>
-
-    <div id="editWrap">
-      <canvas id="edit" width="320" height="220"></canvas>
-      <div class="row">
-        <button id="autoRect" class="btn">自动框选（80%）</button>
-        <button id="clearMarks" class="btn">清除标注</button>
-        <button id="cancelRect" class="btn">取消框选</button>
-      </div>
-      <div class="row">
-        <button id="doGrabCut" class="btn">执行抠图</button>
-        <button id="refine" class="btn">再次细化</button>
-        <button id="stop" class="btn">停止/中止</button>
-      </div>
-      <div class="note">提示：只画白框也能出结果；标注红（前景）/蓝（背景）可让边缘更准。</div>
-    </div>
-
-    <label>覆盖透明度</label>
-    <input type="range" id="alpha" min="0.3" max="1" step="0.05" value="0.95" />
-
-    <label>大小缩放（整体）</label>
-    <input type="range" id="scale" min="0.8" max="2.2" step="0.05" value="1.35" />
-
-    <label>贴合位置（靠近指尖 ←→ 靠近关节）</label>
-    <input type="range" id="along" min="0.45" max="0.8" step="0.01" value="0.58" />
-
-    <label>长度系数（纵向）</label>
-    <input type="range" id="lenK" min="1.0" max="2.8" step="0.05" value="1.9" />
-
-    <label>宽度系数（横向）</label>
-    <input type="range" id="widK" min="0.8" max="2.2" step="0.05" value="1.35" />
+    <label>选择款式图片（建议：含手部的美甲成品大图）</label>
+    <input type="file" id="styleFile" accept="image/*"/>
 
     <div class="row">
-      <label><input type="checkbox" id="showDots"/> 显示手部关键点</label>
+      <button id="autoExtract" class="btn">🔍 一键自动抠指甲（拇指→小指 5 片）</button>
+    </div>
+    <div class="row">
+      <label class="switch"><input type="checkbox" id="mirrorPatch"> 反转贴片（左右手不一致时）</label>
+      <label class="switch"><input type="checkbox" id="perFinger"> 每指使用对应贴片（默认）</label>
+    </div>
+
+    <div id="status">步骤：先选“款式图片” → 点“一键自动抠指甲” → 开启相机即可实时试戴。</div>
+
+    <label>覆盖透明度</label><input type="range" id="alpha" min="0.3" max="1" step="0.05" value="0.95"/>
+    <label>整体缩放</label><input type="range" id="scale" min="0.8" max="2.2" step="0.05" value="1.35"/>
+    <label>贴合位置（靠指尖 ←→ 靠关节）</label><input type="range" id="along" min="0.45" max="0.85" step="0.01" value="0.58"/>
+    <label>长度系数（纵）</label><input type="range" id="lenK" min="1.0" max="3.0" step="0.05" value="1.9"/>
+    <label>宽度系数（横）</label><input type="range" id="widK" min="0.8" max="2.2" step="0.05" value="1.35"/>
+
+    <div class="row">
+      <label><input type="checkbox" id="showDots"> 显示手部关键点</label>
       <button id="snap" class="btn">拍照保存</button>
     </div>
+
+    <details>
+      <summary>手动模式（可清空/取消/停止，GrabCut 兜底）</summary>
+      <div id="editWrap">
+        <div class="row" style="align-items:center">
+          <span class="segchip active" id="tool_fg">前景画笔</span>
+          <span class="segchip" id="tool_bg">背景画笔</span>
+          <span class="segchip" id="tool_rect">矩形框</span>
+          <label style="margin-left:auto">画笔大小</label>
+          <input type="range" id="brush" min="4" max="40" step="1" value="16" style="width:120px"/>
+        </div>
+        <canvas id="edit" width="320" height="220"></canvas>
+        <div class="grid2">
+          <button id="autoRect" class="btn">自动框选（居中80%）</button>
+          <button id="clearMarks" class="btn">清除标注</button>
+          <button id="cancelRect" class="btn">取消框选</button>
+          <button id="doGrabCut" class="btn">执行抠图</button>
+          <button id="refine" class="btn">再次细化</button>
+          <button id="stop" class="btn">停止/中止</button>
+        </div>
+        <div class="note">提示：手动只在白框 ROI 内运算，避免卡死；“清除标注/取消框选/停止”都已支持。</div>
+      </div>
+    </details>
+
+    <p class="note">相机打不开：务必使用 HTTPS（GitHub Pages 域名）并在 Safari 的“AA→网站设置→相机→允许”。</p>
   </div>
 
   <!-- MediaPipe Hands -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js"></script>
-  <!-- HEIC 转换 -->
+  <!-- OpenCV.js（GrabCut 兜底用；自动抠甲不依赖它） -->
+  <script src="https://docs.opencv.org/4.9.0/opencv.js"></script>
+  <!-- HEIC 转换（可选） -->
   <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
-  <!-- OpenCV.js（主源+兜底） -->
-  <script>
-    (function loadCV(){
-      const s=document.createElement('script');
-      s.src="https://docs.opencv.org/4.9.0/opencv.js";
-      s.onload=()=>console.log("OpenCV loaded");
-      s.onerror=()=>{
-        // 兜底到 4.7
-        const s2=document.createElement('script');
-        s2.src="https://docs.opencv.org/4.7.0/opencv.js";
-        document.head.appendChild(s2);
+
+<script>
+/* ========= 基础 UI ========= */
+const banner = document.getElementById('banner');
+const warn = (m)=>{banner.textContent=m; banner.className='warn'; banner.style.display='block';};
+const ok = (m)=>{banner.textContent=m; banner.className='ok'; banner.style.display='block';};
+
+const video = document.getElementById('cam');
+const cvs = document.getElementById('canvas'); const ctx = cvs.getContext('2d');
+const startBtn = document.getElementById('startCam');
+const flipBtn = document.getElementById('flipCam');
+const freezeBtn = document.getElementById('freeze');
+const usePhotoBtn = document.getElementById('usePhoto');
+const handFile = document.getElementById('handFile');
+
+const styleFile = document.getElementById('styleFile');
+const autoExtractBtn = document.getElementById('autoExtract');
+const perFingerEl = document.getElementById('perFinger');
+const mirrorEl = document.getElementById('mirrorPatch');
+
+const statusEl = document.getElementById('status');
+
+const alphaEl=document.getElementById('alpha');
+const scaleEl=document.getElementById('scale');
+const alongEl=document.getElementById('along');
+const lenKEl=document.getElementById('lenK');
+const widKEl=document.getElementById('widK');
+
+let params = {
+  alpha: parseFloat(alphaEl.value),
+  scale: parseFloat(scaleEl.value),
+  along: parseFloat(alongEl.value),
+  lenK: parseFloat(lenKEl.value),
+  widK: parseFloat(widKEl.value),
+};
+alphaEl.oninput=()=>params.alpha=parseFloat(alphaEl.value);
+scaleEl.oninput=()=>params.scale=parseFloat(scaleEl.value);
+alongEl.oninput=()=>params.along=parseFloat(alongEl.value);
+lenKEl.oninput=()=>params.lenK=parseFloat(lenKEl.value);
+widKEl.oninput=()=>params.widK=parseFloat(widKEl.value);
+
+/* ========= 媒体：相机 / 冻结 / 照片 ========= */
+let stream=null, hands=null, facing='environment';
+let bgImage=null; // 冻结帧或手部照片
+let usePhoto=false;
+
+function ensureHands(){
+  if(hands) return;
+  hands = new Hands({ locateFile: (f)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${f}` });
+  hands.setOptions({ maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.6, minTrackingConfidence:0.5 });
+  hands.onResults(onResults);
+}
+startBtn.onclick = openCamera;
+flipBtn.onclick = ()=>{ facing=(facing==='environment')?'user':'environment'; if(stream) openCamera(); };
+freezeBtn.onclick = ()=> {
+  if(video.readyState>=2){
+    const c=document.createElement('canvas'); c.width=cvs.width; c.height=cvs.height;
+    c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+    const img=new Image(); img.src=c.toDataURL('image/png');
+    img.onload=()=>{ bgImage=img; usePhoto=true; runHandsOnImage(img).then(()=>drawOnce()); ok('已冻结当前帧'); };
+  }
+};
+usePhotoBtn.onclick = ()=> handFile.click();
+handFile.onchange = async (e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  const img = await fileToImage(f, 1600);
+  bgImage = img; usePhoto=true;
+  cvs.width = img.width; cvs.height = img.height;
+  await runHandsOnImage(img);
+  drawOnce(); ok('已加载手部照片');
+};
+
+async function openCamera(){
+  usePhoto=false; bgImage=null;
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720} }, audio:false });
+  }catch(e){
+    try{ stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false }); }
+    catch(e2){ warn('相机失败：请确认 HTTPS & 相机权限'); return; }
+  }
+  video.srcObject = stream;
+  video.onloadedmetadata = ()=>{ cvs.width=video.videoWidth||1280; cvs.height=video.videoHeight||720; };
+  await video.play();
+  ensureHands();
+  requestAnimationFrame(loop);
+  ok('相机已开启');
+}
+
+let lastLandmarks=null;
+function onResults(res){
+  lastLandmarks = res.multiHandLandmarks || null;
+  drawOnce(res.image);
+}
+async function runHandsOnImage(img){ ensureHands(); await hands.send({image:img}); }
+async function loop(){ if(!usePhoto && hands && video.readyState>=2){ await hands.send({image:video}); } requestAnimationFrame(loop); }
+
+function drawOnce(imgSrc){
+  const w=cvs.width,h=cvs.height; ctx.clearRect(0,0,w,h);
+  if(usePhoto && bgImage) ctx.drawImage(bgImage,0,0,w,h);
+  else if(imgSrc) ctx.drawImage(imgSrc,0,0,w,h);
+  if(lastLandmarks && lastLandmarks.length){
+    if(document.getElementById('showDots').checked){
+      ctx.save(); ctx.fillStyle='rgba(0,255,120,0.9)';
+      lastLandmarks.forEach(lm=>lm.forEach(p=>ctx.fillRect(p.x*w-2,p.y*h-2,4,4))); ctx.restore();
+    }
+    for(const lm of lastLandmarks){ drawNailsOnHand(lm); }
+  }
+}
+
+/* ========= 自动抠指甲（基于指尖几何） ========= */
+let styleImg=null;           // 原始款式图
+let stylePatches = [null,null,null,null,null]; // 拇指→小指 5 片
+let styleLandmarks=null;
+
+styleFile.onchange = async (e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  styleImg = await fileToImage(f, 2000);  // 大图也OK
+  statusEl.textContent='已载入款式图片。点击“自动抠指甲”。';
+};
+
+autoExtractBtn.onclick = async ()=>{
+  if(!styleImg){ statusEl.textContent='请先选择款式图片。'; return; }
+  ensureHands();
+  autoExtractBtn.disabled=true; statusEl.textContent='分析款式图中的手部…';
+  try{
+    // 在款式图上跑一次手部关键点
+    await hands.send({image:styleImg});
+    if(!lastLandmarks || !lastLandmarks.length){ statusEl.textContent='未检测到手部：请换一张含手的款式大图。'; return; }
+    styleLandmarks = lastLandmarks[0]; // 取第一只手
+    // 生成 5 张指甲贴片
+    const res = await extractFiveNailPatches(styleImg, styleLandmarks);
+    stylePatches = res; // [thumb..pinky]
+    const okCount = res.filter(Boolean).length;
+    if(okCount===0){ statusEl.textContent='自动抠甲失败：请换更清晰的款式图，或使用“手动模式”兜底。'; }
+    else{ statusEl.textContent=`自动抠甲成功：生成 ${okCount}/5 张贴片。开启相机即可实时试戴。`; ok('已生成贴片'); }
+  } finally {
+    autoExtractBtn.disabled=false;
+  }
+};
+
+function lm2px(lm){ return {x: lm.x*styleImg.width, y: lm.y*styleImg.height}; }
+
+// 提取 5 个指甲贴片：对每根指，依据 DIP→TIP 轴做旋转裁剪并椭圆遮罩
+async function extractFiveNailPatches(img, lm){
+  const fingers = [
+    {pip:2,dip:3,tip:4},   // 拇指
+    {pip:6,dip:7,tip:8},   // 食指
+    {pip:10,dip:11,tip:12},// 中指
+    {pip:14,dip:15,tip:16},// 无名指
+    {pip:18,dip:19,tip:20} // 小指
+  ];
+  const out = [null,null,null,null,null];
+
+  for(let i=0;i<5;i++){
+    const F=fingers[i];
+    const P=lm[F.pip], D=lm[F.dip], T=lm[F.tip];
+    if(!P||!D||!T) continue;
+    const Pp=lm2px(P), Dp=lm2px(D), Tp=lm2px(T);
+
+    const vdx=Tp.x-Dp.x, vdy=Tp.y-Dp.y;
+    const len=Math.hypot(vdx,vdy); if(len<4) continue;
+    const baseW=Math.hypot(Dp.x-Pp.x, Dp.y-Pp.y);
+
+    const angle=Math.atan2(vdy,vdx);            // 指尖方向
+    const cx=Dp.x + (Tp.x-Dp.x)*0.55;           // 甲面中心略靠近指尖
+    const cy=Dp.y + (Tp.y-Dp.y)*0.55;
+    const w=Math.max(14, baseW*1.25);           // 指甲宽
+    const h=Math.max(18, len*2.0);              // 指甲长（略放大，容错）
+
+    const patch = rotatedCropWithEllipseMask(img, cx, cy, angle, w, h, 0.5, 0.9);
+    out[i]=patch;
+  }
+  return out;
+}
+
+// 以 (cx,cy) 为中心，绕其旋转 -angle，把 img 画到临时画布；截取 w×h 区域；再用椭圆作为 alpha 掩膜
+function rotatedCropWithEllipseMask(img, cx, cy, angle, w, h, rx=0.46, ry=0.48){
+  const iw=img.width, ih=img.height;
+  const rot=document.createElement('canvas'); rot.width=iw; rot.height=ih;
+  const g=rot.getContext('2d');
+  g.save(); g.translate(cx,cy); g.rotate(-angle); g.drawImage(img, -cx, -cy); g.restore();
+
+  // 截取 ROI
+  const sx=Math.max(0, Math.round(cx - w/2)), sy=Math.max(0, Math.round(cy - h/2));
+  const sw=Math.min(Math.round(w), iw - sx), sh=Math.min(Math.round(h), ih - sy);
+  const roi = g.getImageData(sx, sy, sw, sh);
+
+  // 画到贴片画布并做椭圆遮罩
+  const patch=document.createElement('canvas'); patch.width=sw; patch.height=sh;
+  const pg=patch.getContext('2d');
+  pg.putImageData(roi,0,0);
+  pg.save();
+  pg.globalCompositeOperation='destination-in';
+  pg.beginPath(); pg.ellipse(sw/2, sh*0.45, sw*rx, sh*ry, 0, 0, Math.PI*2); pg.fill();
+  pg.restore();
+
+  const im=new Image(); im.src=patch.toDataURL('image/png');
+  return im;
+}
+
+/* ========= 在相机/照片上实时贴片 ========= */
+function drawNailsOnHand(lm){
+  const fingers=[{pip:2,dip:3,tip:4},{pip:6,dip:7,tip:8},{pip:10,dip:11,tip:12},{pip:14,dip:15,tip:16},{pip:18,dip:19,tip:20}];
+  for(let i=0;i<5;i++){
+    const F=fingers[i]; const P=lm[F.pip], D=lm[F.dip], T=lm[F.tip]; if(!P||!D||!T) continue;
+    const Pp={x:P.x*cvs.width,y:P.y*cvs.height};
+    const Dp={x:D.x*cvs.width,y:D.y*cvs.height};
+    const Tp={x:T.x*cvs.width,y:T.y*cvs.height};
+    const vdx=Tp.x-Dp.x, vdy=Tp.y-Dp.y;
+    const len=Math.hypot(vdx,vdy); const baseW=Math.hypot(Dp.x-Pp.x,Dp.y-Pp.y);
+    const angle=Math.atan2(vdy,vdx);
+    const cx=Dp.x+(Tp.x-Dp.x)*params.along;
+    const cy=Dp.y+(Tp.y-Dp.y)*params.along;
+    const w=Math.max(10,baseW*params.widK*params.scale);
+    const h=Math.max(14,len*params.lenK*params.scale);
+
+    // 选择贴片
+    let patch = null;
+    if(perFingerEl.checked){
+      const idx = mirrorEl.checked ? (4-i) : i;
+      patch = stylePatches[idx] || stylePatches.find(Boolean);
+    }else{
+      patch = stylePatches.find(Boolean);
+    }
+    if(!patch) continue;
+
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(angle); ctx.globalAlpha=params.alpha;
+    ctx.beginPath(); ctx.ellipse(0, -h*0.12, w*0.46, h*0.48, 0, 0, Math.PI*2); ctx.clip();
+    ctx.drawImage(patch, -w/2, -h/2, w, h);
+    ctx.restore();
+  }
+}
+
+/* ========= 手动模式（可清空/取消/停止；ROI GrabCut） ========= */
+const edit = document.getElementById('edit'); const ectx = edit.getContext('2d');
+const marks = document.createElement('canvas'); const mctx = marks.getContext('2d');
+const chipFg=document.getElementById('tool_fg');
+const chipBg=document.getElementById('tool_bg');
+const chipRect=document.getElementById('tool_rect');
+const brush=document.getElementById('brush');
+let tool='fg', brushSize=16, isDown=false, startX=0,startY=0, rect=null;
+function setTool(t){ tool=t; [chipFg,chipBg,chipRect].forEach(x=>x.classList.remove('active')); ({fg:chipFg,bg:chipBg,rect:chipRect}[t]).classList.add('active'); }
+chipFg.onclick=()=>setTool('fg'); chipBg.onclick=()=>setTool('bg'); chipRect.onclick=()=>setTool('rect'); brush.oninput=()=>brushSize=parseInt(brush.value,10);
+
+styleFile.addEventListener('change', async (e)=>{
+  // 为手动模式准备编辑画布
+  const f=e.target.files?.[0]; if(!f) return;
+  const im = await fileToImage(f, 1024);
+  edit.width=im.width; edit.height=im.height; marks.width=im.width; marks.height=im.height;
+  ectx.drawImage(im,0,0); mctx.clearRect(0,0,marks.width,marks.height);
+  rect = {x:Math.round(im.width*0.2), y:Math.round(im.height*0.2), w:Math.round(im.width*0.6), h:Math.round(im.height*0.6)};
+  drawEditor();
+});
+
+function getCanvasPos(e){
+  const r = edit.getBoundingClientRect();
+  const sx=edit.width/r.width, sy=edit.height/r.height;
+  const cx = e.touches? e.touches[0].clientX : (e.clientX ?? e.pageX);
+  const cy = e.touches? e.touches[0].clientY : (e.clientY ?? e.pageY);
+  return { x:Math.max(0,Math.min(edit.width,(cx-r.left)*sx)), y:Math.max(0,Math.min(edit.height,(cy-r.top)*sy)) };
+}
+edit.addEventListener('pointerdown', (e)=>{
+  edit.setPointerCapture(e.pointerId); isDown=true;
+  const p=getCanvasPos(e); startX=p.x; startY=p.y;
+  if(tool==='fg'||tool==='bg'){ mctx.lineCap='round'; mctx.lineJoin='round'; mctx.lineWidth=brushSize; mctx.strokeStyle=(tool==='fg')?'rgba(255,77,79,0.9)':'rgba(77,163,255,0.9)'; mctx.beginPath(); mctx.moveTo(p.x,p.y); }
+  else rect={x:p.x,y:p.y,w:1,h:1};
+  drawEditor();
+});
+edit.addEventListener('pointermove', (e)=>{
+  if(!isDown) return; const p=getCanvasPos(e);
+  if(tool==='fg'||tool==='bg'){ mctx.lineTo(p.x,p.y); mctx.stroke(); }
+  else { rect.x=Math.min(startX,p.x); rect.y=Math.min(startY,p.y); rect.w=Math.max(10,Math.abs(p.x-startX)); rect.h=Math.max(10,Math.abs(p.y-startY)); }
+  drawEditor();
+});
+window.addEventListener('pointerup', ()=>{ isDown=false; });
+
+function drawEditor(){
+  if(!edit.width) return;
+  ectx.clearRect(0,0,edit.width,edit.height);
+  ectx.drawImage(edit,0,0);
+  ectx.globalAlpha=0.7; ectx.drawImage(marks,0,0); ectx.globalAlpha=1;
+  if(rect){
+    ectx.fillStyle='rgba(0,0,0,0.25)'; ectx.fillRect(0,0,edit.width,edit.height);
+    ectx.clearRect(rect.x,rect.y,rect.w,rect.h);
+    ectx.setLineDash([6,4]); ectx.strokeStyle='#fff'; ectx.lineWidth=2; ectx.strokeRect(rect.x,rect.y,rect.w,rect.h);
+  }
+}
+
+document.getElementById('autoRect').onclick=()=>{ if(!edit.width) return; rect={x:Math.round(edit.width*0.1),y:Math.round(edit.height*0.1),w:Math.round(edit.width*0.8),h:Math.round(edit.height*0.8)}; drawEditor(); };
+document.getElementById('clearMarks').onclick=()=>{ if(!edit.width) return; mctx.clearRect(0,0,marks.width,marks.height); drawEditor(); statusEl.textContent='已清除标注'; };
+document.getElementById('cancelRect').onclick=()=>{ rect=null; drawEditor(); statusEl.textContent='已取消框选'; };
+
+let running=false, cancelRun=false;
+document.getElementById('stop').onclick=()=>{ if(running){ cancelRun=true; statusEl.textContent='已请求停止…'; } };
+document.getElementById('doGrabCut').onclick=()=> startGrabCut({iter:7});
+document.getElementById('refine').onclick=()=> startGrabCut({iter:3, refine:true});
+
+async function startGrabCut({iter=7, refine=false}={}){
+  if(!window.cv){ statusEl.textContent='OpenCV 未加载'; return; }
+  if(!edit.width){ statusEl.textContent='请先选择款式图（用于手动模式）'; return; }
+  if(!rect){ statusEl.textContent='请先框选矩形'; return; }
+  if(running){ cancelRun=true; await new Promise(r=>setTimeout(r,50)); }
+  running=true; cancelRun=false;
+
+  try{
+    const rx=rect.x|0, ry=rect.y|0, rw=rect.w|0, rh=rect.h|0;
+    const srcCan=document.createElement('canvas'); srcCan.width=rw; srcCan.height=rh;
+    const sg=srcCan.getContext('2d'); sg.drawImage(edit, rx, ry, rw, rh, 0,0, rw, rh);
+    const src=cv.imread(srcCan); cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
+
+    const mask=new cv.Mat(src.rows, src.cols, cv.CV_8U); mask.setTo(new cv.Scalar(cv.GC_PR_BGD));
+    const mark = mctx.getImageData(rx,ry,rw,rh).data;
+    let marked=0;
+    for(let y=0;y<rh;y++) for(let x=0;x<rw;x++){
+      const i=(y*rw+x)*4; const r=mark[i], g=mark[i+1], b=mark[i+2], a=mark[i+3];
+      if(a>0){ marked++; if(r>200&&g<100&&b<100) mask.ucharPtr(y,x)[0]=cv.GC_FGD; else if(b>200&&r<100) mask.ucharPtr(y,x)[0]=cv.GC_BGD; else mask.ucharPtr(y,x)[0]=cv.GC_PR_FGD; }
+    }
+    const bgd=new cv.Mat(), fgd=new cv.Mat();
+
+    // 初始化：有标注用 MASK；无标注用 RECT（自动）
+    cv.grabCut(src, mask, new cv.Rect(0,0,src.cols,src.rows), bgd, fgd, 1, marked?cv.GC_INIT_WITH_MASK:cv.GC_INIT_WITH_RECT);
+
+    for(let k=1;k<iter;k++){
+      if(cancelRun){ statusEl.textContent='已停止'; break; }
+      cv.grabCut(src, mask, new cv.Rect(0,0,src.cols,src.rows), bgd, fgd, 1, cv.GC_EVAL);
+      await new Promise(r=>setTimeout(r,0)); // 让出主线程，防假死
+      statusEl.textContent=`抠图中… ${k+1}/${iter}`;
+    }
+
+    if(!cancelRun){
+      const pr=new cv.Mat(), sure=new cv.Mat(), finalM=new cv.Mat();
+      cv.compare(mask, new cv.Mat(mask.rows,mask.cols,mask.type(), new cv.Scalar(cv.GC_PR_FGD)), pr, cv.CMP_EQ);
+      cv.compare(mask, new cv.Mat(mask.rows,mask.cols,mask.type(), new cv.Scalar(cv.GC_FGD)),    sure, cv.CMP_EQ);
+      cv.bitwise_or(pr, sure, finalM);
+      const out=new cv.Mat(src.rows, src.cols, cv.CV_8UC4), rgba=new cv.Mat();
+      cv.cvtColor(src, rgba, cv.COLOR_RGB2RGBA);
+      const planes=new cv.MatVector(); cv.split(rgba, planes); planes.push_back(finalM); cv.merge(planes, out);
+
+      const outCanvas=document.createElement('canvas'); cv.imshow(outCanvas, out);
+      const img=new Image(); img.onload=()=>{ // 手动模式产出的贴片，给所有手指通用
+        stylePatches = [img,img,img,img,img];
+        statusEl.textContent='手动抠图完成：已应用到试戴';
+        drawOnce();
       };
-      document.head.appendChild(s);
-    })();
-  </script>
-
-  <script>
-    // ==== 通用 UI ====
-    const banner = document.getElementById('banner');
-    const showWarn = (m)=>{ banner.textContent=m; banner.className='warn'; banner.style.display='block'; };
-    const showOK = (m)=>{ banner.textContent=m; banner.className='ok'; banner.style.display='block'; };
-
-    const video = document.getElementById('cam');
-    const cvs = document.getElementById('canvas'); const ctx = cvs.getContext('2d');
-    const startBtn = document.getElementById('startCam');
-    const flipBtn = document.getElementById('flipCam');
-    const freezeBtn = document.getElementById('freeze');
-    const usePhotoBtn = document.getElementById('usePhoto');
-    const handFile = document.getElementById('handFile');
-    const fileInput = document.getElementById('styleFile');
-    const snapBtn = document.getElementById('snap');
-    const showDots = document.getElementById('showDots');
-    const thumb = document.getElementById('thumb');
-    const statusEl = document.getElementById('status');
-
-    const alphaEl=document.getElementById('alpha');
-    const scaleEl=document.getElementById('scale');
-    const alongEl=document.getElementById('along');
-    const lenKEl=document.getElementById('lenK');
-    const widKEl=document.getElementById('widK');
-
-    const edit = document.getElementById('edit'); const ectx = edit.getContext('2d');
-    const marks = document.createElement('canvas'); const mctx = marks.getContext('2d');
-    let editImg=null, rect=null, tool='fg', brushSize=16, isDown=false, startX=0,startY=0;
-
-    const chipFg=document.getElementById('tool_fg');
-    const chipBg=document.getElementById('tool_bg');
-    const chipRect=document.getElementById('tool_rect');
-    const brush=document.getElementById('brush');
-    chipFg.onclick=()=>setTool('fg'); chipBg.onclick=()=>setTool('bg'); chipRect.onclick=()=>setTool('rect'); brush.oninput=()=>brushSize=parseInt(brush.value,10);
-    function setTool(t){ tool=t; [chipFg,chipBg,chipRect].forEach(x=>x.classList.remove('active')); ({fg:chipFg,bg:chipBg,rect:chipRect}[t]).classList.add('active'); }
-
-    let stream=null, handsInst=null, facing='environment';
-    let patchImg=null, frozenImage=null, usePhoto=false;
-
-    let params = { alpha:parseFloat(alphaEl.value), scale:parseFloat(scaleEl.value), along:parseFloat(alongEl.value), lenK:parseFloat(lenKEl.value), widK:parseFloat(widKEl.value) };
-    alphaEl.oninput=()=>params.alpha=parseFloat(alphaEl.value);
-    scaleEl.oninput=()=>params.scale=parseFloat(scaleEl.value);
-    alongEl.oninput=()=>params.along=parseFloat(alongEl.value);
-    lenKEl.oninput=()=>params.lenK=parseFloat(lenKEl.value);
-    widKEl.oninput=()=>params.widK=parseFloat(widKEl.value);
-
-    // 生成默认贴片（渐变）
-    function makeSample(){
-      const c=document.createElement('canvas'); c.width=c.height=320;
-      const g=c.getContext('2d');
-      g.save(); g.translate(160,180); g.rotate(-0.02);
-      g.beginPath(); g.moveTo(-70,60);
-      g.quadraticCurveTo(-100,0,-50,-120);
-      g.quadraticCurveTo(0,-150,50,-120);
-      g.quadraticCurveTo(100,0,70,60);
-      g.quadraticCurveTo(0,90,-70,60); g.closePath(); g.clip();
-      const grd=g.createLinearGradient(0,-150,0,90);
-      grd.addColorStop(0,'rgba(255,200,210,0.96)');
-      grd.addColorStop(0.6,'rgba(230,120,160,0.92)');
-      grd.addColorStop(1,'rgba(180,80,120,0.9)');
-      g.fillStyle=grd; g.fillRect(-160,-160,320,320);
-      g.globalAlpha=0.35; g.fillStyle='#fff'; g.beginPath(); g.ellipse(-18,-40,22,55,0,0,Math.PI*2); g.fill();
-      g.restore();
-      const img=new Image(); img.src=c.toDataURL('image/png'); return img;
+      img.src=outCanvas.toDataURL('image/png');
+      planes.delete(); rgba.delete(); out.delete(); pr.delete(); sure.delete(); finalM.delete();
     }
-    patchImg = makeSample(); thumb.src = patchImg.src;
+    src.delete(); mask.delete(); bgd.delete(); fgd.delete();
+  }catch(e){ console.error(e); statusEl.textContent='GrabCut 失败：缩小白框或多涂几笔重试'; }
+  running=false; cancelRun=false;
+}
 
-    // ==== 手部照片或相机 ====
-    usePhotoBtn.addEventListener('click', ()=> handFile.click());
-    handFile.addEventListener('change', async (e)=>{
-      const f=e.target.files?.[0]; if(!f) return;
-      const img = await fileToImage(f, 1280);
-      frozenImage = img; usePhoto=true;
-      cvs.width = img.width; cvs.height = img.height;
-      await runHandsOnImage(img);
-      drawLoopOnce();
-      showOK('已加载手部照片');
-    });
+/* ========= 工具 ========= */
+function drawNailsDebug(){ if(lastLandmarks) lastLandmarks.forEach(drawNailsOnHand); }
+document.getElementById('snap').onclick=()=>{ const a=document.createElement('a'); a.href=cvs.toDataURL('image/png'); a.download='nail-tryon.png'; a.click(); };
 
-    async function openCamera(){
-      usePhoto=false; frozenImage=null;
-      if(!navigator.mediaDevices?.getUserMedia){ showWarn('浏览器不支持相机 API'); return; }
-      if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-      try{
-        stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720} }, audio:false });
-      }catch(err){
-        try{ stream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false }); }
-        catch(err2){ showWarn('相机失败：请检查 HTTPS & 权限'); return; }
-      }
-      cam.srcObject=stream;
-      cam.onloadedmetadata=()=>{ cvs.width = cam.videoWidth||1280; cvs.height = cam.videoHeight||720; };
-      try{ await cam.play(); }catch(e){}
-      ensureHands();
-      requestAnimationFrame(loop);
-      showOK('相机已开启');
-    }
-    const cam=document.getElementById('cam');
-    startBtn.addEventListener('click', openCamera);
-    flipBtn.addEventListener('click', ()=>{ facing=(facing==='environment')?'user':'environment'; if(stream) openCamera(); });
-    freezeBtn.addEventListener('click', ()=>{ if(cam.readyState>=2){ const img=new Image(); const c=document.createElement('canvas'); c.width=cvs.width; c.height=cvs.height; const g=c.getContext('2d'); g.drawImage(cam,0,0,c.width,c.height); img.src=c.toDataURL('image/png'); img.onload=()=>{ frozenImage=img; usePhoto=true; runHandsOnImage(img).then(drawLoopOnce); showOK('已冻结当前帧'); }; } });
-
-    function ensureHands(){
-      if(handsInst) return;
-      handsInst=new Hands({ locateFile:(f)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${f}` });
-      handsInst.setOptions({ maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.6, minTrackingConfidence:0.5 });
-      handsInst.onResults(onResults);
-    }
-    let lastLandmarks = null;
-    function onResults(res){
-      lastLandmarks = res.multiHandLandmarks || null;
-      drawLoopOnce(res.image);
-    }
-    async function runHandsOnImage(img){
-      ensureHands();
-      await handsInst.send({image: img});
-    }
-    function drawLoopOnce(imgSrc){
-      const w=cvs.width, h=cvs.height; ctx.clearRect(0,0,w,h);
-      if(usePhoto && frozenImage){ ctx.drawImage(frozenImage,0,0,w,h); }
-      else if(imgSrc){ ctx.drawImage(imgSrc,0,0,w,h); }
-      if(lastLandmarks && lastLandmarks.length){
-        if(showDots.checked){
-          ctx.save(); ctx.fillStyle='rgba(0,255,120,0.9)';
-          lastLandmarks.forEach(lm=>lm.forEach(p=>ctx.fillRect(p.x*w-2,p.y*h-2,4,4))); ctx.restore();
-        }
-        for(const lm of lastLandmarks){ drawNails(lm); }
-      }
-    }
-    async function loop(){ if(!usePhoto && handsInst && cam.readyState>=2){ await handsInst.send({image:cam}); } requestAnimationFrame(loop); }
-
-    function drawNails(lm){
-      const fingers=[{pip:2,dip:3,tip:4},{pip:6,dip:7,tip:8},{pip:10,dip:11,tip:12},{pip:14,dip:15,tip:16},{pip:18,dip:19,tip:20}];
-      for(const f of fingers){
-        const P=lm[f.pip], D=lm[f.dip], T=lm[f.tip]; if(!P||!D||!T) continue;
-        const Pp={x:P.x*cvs.width,y:P.y*cvs.height};
-        const Dp={x:D.x*cvs.width,y:D.y*cvs.height};
-        const Tp={x:T.x*cvs.width,y:T.y*cvs.height};
-        const vdx=Tp.x-Dp.x, vdy=Tp.y-Dp.y;
-        const len=Math.hypot(vdx,vdy);
-        const widthBase=Math.hypot(Dp.x-Pp.x,Dp.y-Pp.y);
-        const angle=Math.atan2(vdy,vdx);
-        const cx=Dp.x+(Tp.x-Dp.x)*params.along;
-        const cy=Dp.y+(Tp.y-Dp.y)*params.along;
-        const w=Math.max(10,widthBase*params.widK*params.scale);
-        const h=Math.max(14,len*params.lenK*params.scale);
-        ctx.save();
-        ctx.translate(cx,cy); ctx.rotate(angle); ctx.globalAlpha=params.alpha;
-        ctx.beginPath(); ctx.ellipse(0,-h*0.12,w*0.46,h*0.48,0,0,Math.PI*2); ctx.clip();
-        if(patchImg){ ctx.drawImage(patchImg,-w/2,-h/2,w,h); }
-        ctx.restore();
-      }
-    }
-
-    // ==== 抠图编辑器 ====
-    function getCanvasPos(e){
-      const r = edit.getBoundingClientRect();
-      const scaleX = edit.width / r.width;
-      const scaleY = edit.height / r.height;
-      const clientX = e.touches? e.touches[0].clientX : (e.clientX ?? e.pageX);
-      const clientY = e.touches? e.touches[0].clientY : (e.clientY ?? e.pageY);
-      const x = (clientX - r.left) * scaleX;
-      const y = (clientY - r.top) * scaleY;
-      return { x: Math.max(0, Math.min(edit.width, x)), y: Math.max(0, Math.min(edit.height, y)) };
-    }
-    edit.addEventListener('pointerdown', (e)=>{
-      if(!editImg) return; edit.setPointerCapture(e.pointerId);
-      isDown=true; const p=getCanvasPos(e); startX=p.x; startY=p.y;
-      if(tool==='fg'||tool==='bg'){ mctx.lineCap='round'; mctx.lineJoin='round'; mctx.lineWidth=brushSize; mctx.strokeStyle = (tool==='fg')?'rgba(255,77,79,0.9)':'rgba(77,163,255,0.9)'; mctx.beginPath(); mctx.moveTo(p.x,p.y);}
-      else{ rect={x:p.x,y:p.y,w:1,h:1}; }
-      drawEditor();
-    });
-    edit.addEventListener('pointermove', (e)=>{
-      if(!isDown||!editImg) return; const p=getCanvasPos(e);
-      if(tool==='fg'||tool==='bg'){ mctx.lineTo(p.x,p.y); mctx.stroke(); }
-      else{ rect.x=Math.min(startX,p.x); rect.y=Math.min(startY,p.y); rect.w=Math.max(10,Math.abs(p.x-startX)); rect.h=Math.max(10,Math.abs(p.y-startY)); }
-      drawEditor();
-    });
-    window.addEventListener('pointerup', ()=>{ isDown=false; });
-
-    function drawEditor(){
-      ectx.clearRect(0,0,edit.width,edit.height);
-      if(!editImg) return;
-      ectx.drawImage(editImg,0,0,edit.width,edit.height);
-      ectx.globalAlpha=0.7; ectx.drawImage(marks,0,0); ectx.globalAlpha=1;
-      if(rect){ ectx.fillStyle='rgba(0,0,0,0.25)'; ectx.fillRect(0,0,edit.width,edit.height);
-        ectx.clearRect(rect.x,rect.y,rect.w,rect.h); ectx.strokeStyle='#fff'; ectx.setLineDash([6,4]); ectx.lineWidth=2; ectx.strokeRect(rect.x,rect.y,rect.w,rect.h); }
-    }
-    function toCanvasMax(img, maxSide=768){
-      const w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
-      const scale = Math.min(1, maxSide/Math.max(w,h));
-      const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(w*scale)); c.height=Math.max(1,Math.round(h*scale));
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      return c;
-    }
-    async function fileToImage(file, maxSide=768){
-      let url; try{
-        if(file.type.includes('heic')||file.type.includes('heif')){ const blob=await heic2any({blob:file,toType:'image/jpeg'}); url=URL.createObjectURL(blob); }
-        else{ url=URL.createObjectURL(file); }
-      }catch(err){ url=URL.createObjectURL(file); }
-      const img=await new Promise((resolve,reject)=>{ const im=new Image(); im.onload=()=>resolve(im); im.onerror=reject; im.src=url; });
-      const c=toCanvasMax(img,maxSide); const out=new Image(); out.src=c.toDataURL('image/png'); await out.decode(); return out;
-    }
-
-    fileInput.addEventListener('change', async (e)=>{
-      const f=e.target.files?.[0]; if(!f) return;
-      statusEl.textContent='载入款式图…';
-      const im = await fileToImage(f, 768);
-      editImg = im; edit.width=im.width; edit.height=im.height; marks.width=im.width; marks.height=im.height; mctx.clearRect(0,0,marks.width,marks.height);
-      rect={ x:Math.round(edit.width*0.2), y:Math.round(edit.height*0.15), w:Math.round(edit.width*0.6), h:Math.round(edit.height*0.5) };
-      drawEditor(); statusEl.textContent='已载入：仅白框也可抠；加涂红/蓝更准。';
-    });
-
-    document.getElementById('autoRect').addEventListener('click', ()=>{
-      if(!editImg) return;
-      rect = { x: Math.round(edit.width*0.1), y: Math.round(edit.height*0.1), w: Math.round(edit.width*0.8), h: Math.round(edit.height*0.8) };
-      drawEditor();
-    });
-    document.getElementById('clearMarks').addEventListener('click', ()=>{
-      if(!editImg) return;
-      mctx.clearRect(0,0,marks.width,marks.height);
-      drawEditor();
-      statusEl.textContent='已清除标注。';
-    });
-    document.getElementById('cancelRect').addEventListener('click', ()=>{
-      rect = null;
-      drawEditor();
-      statusEl.textContent='已取消框选。';
-    });
-
-    // ==== 可取消/可重跑 GrabCut ====
-    let running=false, cancelRun=false;
-    const doBtn = document.getElementById('doGrabCut');
-    const refBtn = document.getElementById('refine');
-    const stopBtn = document.getElementById('stop');
-
-    stopBtn.onclick=()=>{ if(running){ cancelRun=true; statusEl.textContent='已请求停止…'; } };
-
-    doBtn.onclick=()=> startGrabCut({totalIter:8, stepIter:1, refine:false});
-    refBtn.onclick=()=> startGrabCut({totalIter:4, stepIter:1, refine:true});
-
-    async function startGrabCut(opts){
-      if(!window.cv){ statusEl.textContent='OpenCV 未加载。刷新或换网络再试。'; return; }
-      if(!editImg){ statusEl.textContent='请先选择款式图。'; return; }
-      if(!rect){ statusEl.textContent='请先框选矩形（只包贴片）。'; return; }
-
-      // 若正在运行：先请求停止，再开启新一轮
-      if(running){ cancelRun=true; await new Promise(r=>setTimeout(r,50)); }
-
-      running=true; cancelRun=false;
-      doBtn.disabled=refBtn.disabled=stopBtn.disabled=true; // 先禁用，防多击
-      stopBtn.disabled=false; // 允许停止
-      try{
-        await runGrabCutControlled(opts);
-      }catch(err){
-        console.error(err);
-        statusEl.textContent='抠图异常：缩小白框或多涂几笔再试。';
-      }finally{
-        running=false; cancelRun=false;
-        doBtn.disabled=refBtn.disabled=stopBtn.disabled=false;
-      }
-    }
-
-    async function runGrabCutControlled({totalIter=8, stepIter=1, refine=false}={}){
-      statusEl.textContent=`准备抠图…`;
-
-      // 1) 取 ROI
-      const rx=rect.x|0, ry=rect.y|0, rw=rect.w|0, rh=rect.h|0;
-      const temp=document.createElement('canvas'); temp.width=rw; temp.height=rh;
-      const g=temp.getContext('2d'); g.drawImage(editImg, rx, ry, rw, rh, 0,0, rw, rh);
-      const src=cv.imread(temp); cv.cvtColor(src, src, cv.COLOR_RGBA2RGB, 0);
-
-      // 2) 生成/读取 mask
-      const mask=new cv.Mat(src.rows, src.cols, cv.CV_8U);
-      mask.setTo(new cv.Scalar(cv.GC_PR_BGD)); // 默认可能背景
-
-      // 是否有用户画笔标注？
-      const mark = mctx.getImageData(rx,ry,rw,rh);
-      let markedPixels = 0;
-      for(let i=0;i<mark.data.length;i+=4){
-        if(mark.data[i+3]>0){ // 有alpha
-          markedPixels++;
-          const r=mark.data[i], g2=mark.data[i+1], b=mark.data[i+2];
-          if(r>200 && g2<100 && b<100) mask.ucharPtr(Math.floor(i/4/rw), (i/4)%rw)[0]=cv.GC_FGD;
-          else if(b>200 && r<100)      mask.ucharPtr(Math.floor(i/4/rw), (i/4)%rw)[0]=cv.GC_BGD;
-          else                         mask.ucharPtr(Math.floor(i/4/rw), (i/4)%rw)[0]=cv.GC_PR_FGD;
-        }
-      }
-
-      // 无标注 → 用矩形初始化（自动抠图）
-      if(markedPixels===0){
-        for(let y=0;y<rh;y++){
-          for(let x=0;x<rw;x++){
-            mask.ucharPtr(y,x)[0] = (x>5 && y>5 && x<rw-5 && y<rh-5) ? cv.GC_PR_FGD : cv.GC_PR_BGD;
-          }
-        }
-      }
-
-      const bgd=new cv.Mat(), fgd=new cv.Mat();
-
-      // 3) 迭代（可中止）：先 1 次初始化，再多次评估
-      const steps = Math.max(1, Math.ceil(totalIter/stepIter));
-      for(let s=0; s<steps; s++){
-        if(cancelRun){ statusEl.textContent='已停止。'; break; }
-
-        const first = (s===0);
-        const mode = (first && markedPixels>0) ? cv.GC_INIT_WITH_MASK
-                    : (first && markedPixels===0) ? cv.GC_INIT_WITH_RECT
-                    : cv.GC_EVAL; // 连续细化
-
-        cv.grabCut(src, mask, new cv.Rect(0,0,src.cols,src.rows), bgd, fgd, stepIter, mode);
-
-        statusEl.textContent=`抠图中… ${Math.min((s+1)*stepIter,totalIter)}/${totalIter}`;
-        await new Promise(r=>setTimeout(r,0)); // 让出主线程，避免“卡住”感
-      }
-
-      if(!cancelRun){
-        // 4) 输出透明贴片
-        const pr=new cv.Mat(), sure=new cv.Mat(), finalMask=new cv.Mat();
-        cv.compare(mask, new cv.Mat(mask.rows, mask.cols, mask.type(), new cv.Scalar(cv.GC_PR_FGD)), pr, cv.CMP_EQ);
-        cv.compare(mask, new cv.Mat(mask.rows, mask.cols, mask.type(), new cv.Scalar(cv.GC_FGD)), sure, cv.CMP_EQ);
-        cv.bitwise_or(pr, sure, finalMask);
-
-        const out=new cv.Mat(src.rows, src.cols, cv.CV_8UC4), rgba=new cv.Mat();
-        cv.cvtColor(src, rgba, cv.COLOR_RGB2RGBA);
-        const planes=new cv.MatVector(); cv.split(rgba, planes); planes.push_back(finalMask); cv.merge(planes, out);
-
-        const outCanvas=document.createElement('canvas'); cv.imshow(outCanvas, out);
-        const img=new Image();
-        img.onload=()=>{ patchImg=img; thumb.src=img.src; statusEl.textContent='抠图完成：已贴到手指上'; drawLoopOnce(); };
-        img.src=outCanvas.toDataURL('image/png');
-
-        planes.delete(); rgba.delete(); out.delete(); pr.delete(); sure.delete(); finalMask.delete();
-      }
-
-      // 5) 释放
-      src.delete(); mask.delete(); bgd.delete(); fgd.delete();
-    }
-
-    // ==== 保存 ====
-    snapBtn.addEventListener('click', ()=>{ const url=cvs.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='nail-tryon.png'; a.click(); });
-  </script>
+async function fileToImage(file, maxSide=2048){
+  let url;
+  try{
+    if(file.type.includes('heic')||file.type.includes('heif')){
+      const blob = await heic2any({blob:file, toType:'image/jpeg'});
+      url = URL.createObjectURL(blob);
+    }else url = URL.createObjectURL(file);
+  }catch{ url = URL.createObjectURL(file); }
+  const img = await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=url; });
+  // 等比缩放到 maxSide
+  const w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+  const s=Math.min(1, maxSide/Math.max(w,h));
+  if(s===1) return img;
+  const c=document.createElement('canvas'); c.width=Math.round(w*s); c.height=Math.round(h*s);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  const out=new Image(); out.src=c.toDataURL('image/png'); await out.decode(); return out;
+}
+</script>
 </body>
 </html>
